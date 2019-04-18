@@ -75,7 +75,7 @@ static void ContrastAndBright(int, void *)
 //            }
 //        }
 //    }
-    g_dstImage = g_srcImage*(g_nContrastValue*0.02)+g_nBrightValue-50;
+    g_dstImage = g_srcImage*(g_nContrastValue*0.02)+g_nBrightValue-50; //调整图像的亮度和对比度
     //显示图像
     imshow("source image", g_srcImage);
     imshow("result image", g_dstImage);
