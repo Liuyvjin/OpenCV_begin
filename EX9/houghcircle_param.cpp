@@ -53,7 +53,7 @@ int main() {
     srcImage = imread("../pics/ball1.png");
     if (!srcImage.data) {
         printf("读入文件错误！\n");
-        return false;
+        return 1;
     }
     printf("按下q或者esc退出程序,by 刘琎\n");
 
@@ -91,7 +91,7 @@ int main() {
     imshow("边缘检测参数调整", dstImage);
     HoughTrans();
 
-    while(1)
+    while(true)
     {
         int c = waitKey(0);
         //按下键盘按键Q或者ESC，程序退出
