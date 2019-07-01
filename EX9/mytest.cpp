@@ -12,16 +12,14 @@
 using namespace cv;
 using namespace std;
 
-/**全局变量*/
-
 
 /**函数声明*/
 void identify(Mat &src);
-void HoughTrans(Mat& srcImage,Mat& grayImage, vector<Vec3f>& circles);
+void HoughTrans(Mat& srcImage,vector<Vec3f>& circles);
 
 /**主程序*/
 int main() {
-    Mat srcImage,grayImage;
+    Mat srcImage;
     /// 读入源图片
     srcImage = imread("../pics/ball3.png");
     if (!srcImage.data) {
@@ -29,12 +27,11 @@ int main() {
         return 1;
     }
     printf("按下q或者esc退出程序\n");
-    /// 转为灰度图
-    cvtColor(srcImage, grayImage, CV_BGR2GRAY);//转化边缘检测后的图为灰度图
+
     /// 保存找到的圆
     vector<Vec3f>circles;
     /// 霍夫变换，并绘图
-    HoughTrans(srcImage,grayImage,circles);
+    HoughTrans(srcImage,circles);
 
     waitKey(0);
     return 0;
@@ -45,8 +42,12 @@ void identify(Mat &src) {
 
 }
 
-/// 输入灰度图，找出图中的圆,并画在srcImage上
-void HoughTrans(Mat& srcImage,Mat& grayImage, vector<Vec3f>& circles) {
+/// 输入图，找出图中的圆,并画在srcImage上
+void HoughTrans(Mat& srcImage, vector<Vec3f>& circles) {
+
+    Mat grayImage;
+    cvtColor(srcImage, grayImage, CV_BGR2GRAY);//转化边缘检测后的图为灰度图
+
     vector<int> HoughParams = {20, 80, 12, 10, 20};//mindist,canny高阈值,累加器阈值,圆半径最小,最大
     //HoughCircles(InputArray image,OutputArray circles, int method, double dp,
     //             double minDist, double param1=100,double param2=100,
