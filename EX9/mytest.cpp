@@ -1,5 +1,5 @@
 /**
- * @brief: 区分花球和实心球
+ * @brief: 输入图片找球位置
  * @author： liujin
  * @date: 2019/5/11
 */
@@ -13,45 +13,58 @@ using namespace cv;
 using namespace std;
 
 /**全局变量*/
-Mat srcImage, grayImage, houghImage;
-//各种参数
-vector<int> HoughParams = {20, 80, 12, 10, 20};//mindist,canny高阈值,累加器阈值,圆半径最小,最大
+
 
 /**函数声明*/
-void identify(Mat &ball);
+void identify(Mat &src);
+void HoughTrans(Mat& srcImage,Mat& grayImage, vector<Vec3f>& circles);
 
 /**主程序*/
 int main() {
-
+    Mat srcImage,grayImage;
     /// 读入源图片
     srcImage = imread("../pics/ball3.png");
     if (!srcImage.data) {
         printf("读入文件错误！\n");
         return 1;
     }
-    printf("按下q或者esc退出程序,by 刘琎\n");
+    printf("按下q或者esc退出程序\n");
+    /// 转为灰度图
+    cvtColor(srcImage, grayImage, CV_BGR2GRAY);//转化边缘检测后的图为灰度图
+    /// 保存找到的圆
+    vector<Vec3f>circles;
+    /// 霍夫变换，并绘图
+    HoughTrans(srcImage,grayImage,circles);
 
-    Mat roi = srcImage(Rect(100,100,3,3));
-    cout<<format(roi,4)<<endl;
-
-    cout<<int(roi.ptr<Vec3b>(1,1)[0][0])<<endl;/////////
     waitKey(0);
     return 0;
 }
 
-void identify(Mat &ball) {
-    int i = 0, j = 0;
+void identify(Mat &src) {
 
-    /// 白色的颜色范围
-    vector<vector<int>> white_range={{153,255},{138,255},{90,255}};
-    int n_white=0,n_other=0;  //计算白色像素个数，非白色个数
-
-    for(i=0;i<ball.rows;++i)
-        for(j=0;j<ball.cols;++j)
-        {
-            Vec3b*  pixel  = ball.ptr<Vec3b>(i,j);
-            //if(pixel[0] > white_range[0][1]);
-        }
 
 }
 
+/// 输入灰度图，找出图中的圆,并画在srcImage上
+void HoughTrans(Mat& srcImage,Mat& grayImage, vector<Vec3f>& circles) {
+    vector<int> HoughParams = {20, 80, 12, 10, 20};//mindist,canny高阈值,累加器阈值,圆半径最小,最大
+    //HoughCircles(InputArray image,OutputArray circles, int method, double dp,
+    //             double minDist, double param1=100,double param2=100,
+    //             int minRadius=0, int maxRadius=0 )
+    //            输入      输出圆                累加器分辨率 mindist canny高阈值 累加器阈值  圆半径最小最大
+    HoughCircles(grayImage, circles, CV_HOUGH_GRADIENT, 1, HoughParams.at(0), HoughParams.at(1), \
+                 HoughParams.at(2), HoughParams.at(3), HoughParams.at(4));
+    //依次在 houghImage 图中绘制出圆
+    Mat houghImage;
+    srcImage.copyTo(houghImage);
+    for (size_t i = 0; i < circles.size(); i++) {
+        Point center(cvRound(circles[i][0]), cvRound(circles[i][1])); //circles的三个参数：x,y,radius
+        int radius = cvRound(circles[i][2]);
+        //绘制圆心
+        circle(houghImage, center, 3, Scalar(0, 255, 0), -1, 8, 0);  //
+        //绘制圆轮廓
+        circle(houghImage, center, radius, Scalar(155, 50, 255), 3, 8, 0);
+    }
+    //显示效果图
+    imshow("霍夫变换", houghImage);
+}

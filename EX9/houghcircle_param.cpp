@@ -14,7 +14,7 @@ using namespace cv;
 using namespace std;
 
 /**全局变量*/
-Mat srcImage, grayImage, gaussImage, dstImage,houghImage;
+Mat srcImage, grayImage, gaussImage, dstImage, houghImage;
 //各种参数
 vector<int> GaussParams = {0, 1, 3};  //依次是（是否使用高斯滤波，算子半径，xy标准差）
 vector<int> CannyParams = {100, 50, 0}; //阈值1，阈值2，sobel算子大小(0代表3,1代表5,2代表7)
@@ -29,7 +29,8 @@ static void on_Hough(int, void *);
 
 void HoughTrans();
 
-//颜色过滤函数640*360
+/// 颜色过滤函数640*360
+// 输入三个通道的颜色范围，将这个范围内的颜色过滤
 void color_filter(Mat &src, Mat &dst, vector<vector<double>> minmax) {
     int i = 0, j = 0;
 
@@ -57,27 +58,27 @@ int main() {
     }
     printf("按下q或者esc退出程序,by 刘琎\n");
 
-    // 转为灰度图
+    /// 转为灰度图
     cvtColor(srcImage, grayImage, CV_BGR2GRAY);//转化边缘检测后的图为灰度图
     gaussImage = grayImage.clone();
     //imshow("灰度图",midImage);
 
-    //高斯滤波参数调整
+    /// 高斯滤波参数调整
     //vector<int> GaussParams = {0, 3};//依次是（算子半径(零代表没用滤波)，xy标准差）
     namedWindow("高斯滤波参数调整");
     createTrackbar("是否启用", "高斯滤波参数调整", &GaussParams[0], 10, on_Gauss, (void *) &GaussParams);
     createTrackbar("算子半径", "高斯滤波参数调整", &GaussParams[1], 10, on_Gauss, (void *) &GaussParams); //因为要是奇数,所以×2+1
     createTrackbar("标 准 差", "高斯滤波参数调整", &GaussParams[2], 10, on_Gauss, (void *) &GaussParams);
-    //GaussianBlur( midImage, midImage, Size(0, 0),3, 3 );
+    // GaussianBlur( midImage, midImage, Size(0, 0),3, 3 );
     // imshow("高斯滤波后",gaussImage);
 
-    //边缘检测参数调整
+    /// 边缘检测参数调整
     namedWindow("边缘检测参数调整");
     createTrackbar("阈值1", "边缘检测参数调整", &CannyParams[0], 255, on_Canny, (void *) &CannyParams);
     createTrackbar("阈值2", "边缘检测参数调整", &CannyParams[1], 255, on_Canny, (void *) &CannyParams);
     createTrackbar("Sobel算子半径", "边缘检测参数调整", &CannyParams[2], 2, on_Canny, (void *) &CannyParams);
 
-    //霍夫变换参数调整
+    /// 霍夫变换参数调整
     namedWindow("霍夫变换参数调整");//mindist,canny高阈值,累加器阈值,圆半径最小,最大{10,80,25,10,25}
     createTrackbar("圆间最短距离", "霍夫变换参数调整", &HoughParams[0], 50, on_Hough, (void *) &HoughParams);
     createTrackbar("canny高阈值", "霍夫变换参数调整", &HoughParams[1], 255, on_Hough, (void *) &HoughParams);
@@ -85,7 +86,7 @@ int main() {
     createTrackbar("圆半径最小值", "霍夫变换参数调整", &HoughParams[3], 50, on_Hough, (void *) &HoughParams);
     createTrackbar("圆半径最大值", "霍夫变换参数调整", &HoughParams[4], 50, on_Hough, (void *) &HoughParams);
 
-    //初始化图像
+    /// 初始化图像
     imshow("高斯滤波参数调整", gaussImage);//
     Canny(gaussImage, dstImage, 100, 50, 3);
     imshow("边缘检测参数调整", dstImage);
@@ -98,7 +99,14 @@ int main() {
         if( (char)c == 'q'||(char)c == 27 )
             break;
     }
-    //Mat kernel = (Mat_<char>(3, 3) << 0, -1, 0, -1, 5, -1, 0, -1, 0);
+    /// 输出最终的参数
+    cout<<"GaussParams:"<<GaussParams.at(0)<<","<<GaussParams.at(1)<<","<<GaussParams.at(2)<<endl;
+    cout<<"CannyParams:"<<CannyParams.at(0)<<","<<CannyParams.at(1)<<","<<CannyParams.at(2)<<endl;
+    cout<<"HoughParams:"<<HoughParams.at(0)<<","<<HoughParams.at(1)<<","<<HoughParams.at(2)<<","\
+    <<HoughParams.at(3)<<","<<HoughParams.at(4)<<endl;
+
+
+    // Mat kernel = (Mat_<char>(3, 3) << 0, -1, 0, -1, 5, -1, 0, -1, 0);
     return 0;
 }
 
